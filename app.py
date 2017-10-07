@@ -31,7 +31,6 @@ def home():
 def create_user():
     users = db['users']
     id  = users.insert_one(request.get_json(silent=True)).inserted_id
-    print id
     return '{user_id :'+str(id)+'}'
 
 
