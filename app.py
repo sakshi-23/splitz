@@ -39,7 +39,6 @@ def profile():
 @app.route('/register', methods=['POST'])
 def create_user():
     new_user = request.get_json(silent=True)
-    print new_user['email_id']
     user = users.find_one({'email_id': new_user['email_id']})
     if user is None:
         id = users.insert_one(new_user).inserted_id
