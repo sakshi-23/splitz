@@ -3,6 +3,7 @@ import os
 from os import environ
 import json
 from pymongo import MongoClient
+from bson.objectid import ObjectId
 import sys
 from random import randint
 
@@ -80,10 +81,10 @@ def login():
 def create_card():
     virtual_card_info = request.get_json(silent=True)
     request_id = vcards_request.insert_one(virtual_card_info).inserted_id
-    request_id = str(request_id)
+    # request_id = str(request_id)
     virtual_card = generate_virtual_card(request_id)
     owner_id = virtual_card_info['owner_user_id']
-    users.update_one({'_id':owner_id }, {'$push': {'my_vcards': str(request_id)}})
+    users.update_one({'_id':ObjectId(owner_id) }, {'$push': {'my_vcards': str(request_id)}})
     accounts = virtual_card_info['accounts']
     for account in accounts:
         if account['user_exists'] :
@@ -96,7 +97,7 @@ def create_card():
             if 'payment_specified' in account :
                 payment_details['payment_method'] = account['payment_method']
             payment_methods['payment_details'] = payment_details
-            users.update_one({'_id': user_id}, {'$push': {'vcards': payment_methods}})
+            users.update_one({'_id': ObjectId(user_id)}, {'$push': {'vcards': payment_methods}})
             send_app_notification(user_id, request_id)
         else:
             send_out_notification(account)
@@ -119,7 +120,7 @@ def generate_virtual_card(request_id):
     card['exp'] = '01/21'
     card['vcard_req_ref'] = request_id
     card_id = vcards.insert_one(card).inserted_id
-    card_id = str(card_id)
+    # card_id = str(card_id)
     vcards_request.update_one({'_id':request_id}, {'$set' : {"vcard_ref":card_id}})
     return card
 
