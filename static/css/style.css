@@ -1,0 +1,147 @@
+body{
+    background:url('../images/bg.jpg');
+    padding:50px;
+}
+
+.outer{
+        margin: auto;
+            display: flex;
+    align-items: center;
+    height: 500px;
+
+}
+
+
+
+#profile-dp{
+     background-color: rgba(255,255,255,.4);
+    border-top: 1px solid #ddd;
+    clear: both;
+     margin: auto;
+
+    /* margin-bottom: -9px; */
+    /* position: absolute; */
+    bottom: -30px;
+    opacity:0.9;
+    text-align:center;
+    display: block;
+    position: relative;
+    height: 200px;
+    width:100%
+}
+
+
+
+#login-dp{
+     background-color: rgba(255,255,255,.4);
+     border-top: 1px solid #ddd;
+     clear: both;
+     padding: 30px;
+     margin: auto;
+     /* margin-bottom: -9px; */
+     /* position: absolute; */
+     bottom: -30px;
+     opacity:0.9;
+     width:100%;
+     text-align:center;
+}
+#login-dp .help-block{
+    font-size:12px
+}
+#login-dp .bottom{
+    background-color:rgba(255,255,255,.8);
+    border-top:1px solid #ddd;
+    clear:both;
+    padding:14px;
+}
+#login-dp .social-buttons{
+    margin:12px 0
+}
+#login-dp .social-buttons a{
+    width: 49%;
+}
+#login-dp .form-group {
+    margin-bottom: 10px;
+}
+.btn-fb{
+    color: #fff;
+    background-color:#3b5998;
+}
+.btn-fb:hover{
+    color: #fff;
+    background-color:#496ebc
+}
+.btn-tw{
+    color: #fff;
+    background-color:#55acee;
+}
+.btn-tw:hover{
+    color: #fff;
+    background-color:#59b5fa;
+}
+
+
+@media(max-width:768px){
+
+#login-dp{
+        font-size: 20px;
+    }
+
+    .form-control{
+            font-size: 2rem;
+    }
+
+}
+
+.btn-pref .btn {
+    -webkit-border-radius:0 !important;
+}
+
+.btn-group-justified{
+        width: 100%;
+    position: absolute;
+    margin: 0;
+    display: block;
+    left: 0;
+    bottom: 0;
+
+}
+
+.btn-group-justified.btn-group>.btn-group{
+
+        width: 22.6%;
+
+
+
+}
+@media(max-width:1200px){
+.btn-group-justified>.btn, .btn-group-justified>.btn-group{
+ float:left;
+ }
+}
+.btn-group-justified.btn-group>.btn-group.create{
+
+    width:10%
+
+}
+
+.create .glyphicon{
+    height: 24px;
+    padding-top: 3px;
+    color:#ff6868;
+    font-size: 16px;
+}
+
+
+.btn-group-justified .btn{
+     width: 100%;
+     background:#e5e5e5;
+     font-size:9px;
+}
+
+.btn-group-justified .btn.btn-primary{
+     width: 100%;
+     background:#007bff;
+      z-index:100000;
+}
+
