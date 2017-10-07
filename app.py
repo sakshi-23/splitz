@@ -43,6 +43,10 @@ def home():
 def profile():
     return render_template('profile.html')
 
+@app.route('/shopping')
+def shopping():
+    return render_template('shopping.html')
+
 @app.route('/register', methods=['POST'])
 def create_user():
     new_user = request.get_json(silent=True)
