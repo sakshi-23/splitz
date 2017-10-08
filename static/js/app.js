@@ -109,7 +109,7 @@ $(document).ready(function() {
             }
             for (var i in data){
                     var notification = data[i];
-                     htm='<li class="list-group-item col-md-12"><div class="col-md-9">'+notification.message+'</div>'
+                     htm='<li class="list-group-item col-md-12"><div class="col-md-12">'+notification.message+'</div>'
                      if (notification.status_code==1){
                         htm+='<div class="col-md-3"><button class="btn btn-xs btn-default"><span owner_id="'+notification.owner_id+'" data-id="'+notification.notification_id+'" class="accept glyphicon glyphicon-ok"></button><button class="btn btn-xs btn-default"></span><span class="glyphicon glyphicon-remove"></span></button></div>'
                      }
@@ -195,7 +195,7 @@ $(document).ready(function() {
 
 
             var details= {
-                "vcard_req_id" : "59da68a6113de209f806658b",
+                "vcard_req_id" : "59da6e7e6e671f2df74d7e68",
                 "card_number" : "6407073014871305",
                 "amount" : "1294.84",
                 "exp" : "01/21",

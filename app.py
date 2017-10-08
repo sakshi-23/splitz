@@ -178,7 +178,7 @@ def transact():
     transaction_id = str(transaction_id)
     # vcard_ref = transaction_info['vcard_id']
     # my_vcard = vcards.find_one_and_update({'_id':ObjectId(vcard_ref)}, {'$push': {'transactions': transaction_id}})
-    vcard_req = vcards_request.find_one({'_id':ObjectId(transaction_info['vcard_req_id'])})
+    vcard_req = vcards_request.find_one({})
     for account in vcard_req['accounts']:
         if account['user_exists']:
             user_id = ''
