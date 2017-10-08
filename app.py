@@ -60,7 +60,9 @@ def create_user():
         new_user['my_vcards'] = []
         new_user['vcards'] = []
         user = users.insert_one(new_user)
-    user['user_id'] = str(user['_id'])
+        user['user_id'] = str(user['inserted_id'])
+    else:
+        user['user_id'] = str(user['_id'])
     del(user['_id'])
     return json.dumps(user)
 
