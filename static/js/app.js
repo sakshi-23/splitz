@@ -121,7 +121,8 @@ $(document).ready(function() {
             "amount" : $("#limit").val(),
             "single_use" : $("#singleuse").val()=='on'?true:false,
             "owner_user_id" : user_id,
-            "accounts": accounts
+            "accounts": accounts,
+            "desc": $("#desc").val()
         }
 
           $.ajax({
@@ -145,7 +146,11 @@ $(document).ready(function() {
                 });
 
 
-	 })
+	 });
+
+//	 $("#vcardbutton").on("click",function(){
+//
+//	 });
 
 
 	  setInterval(function(){
@@ -154,6 +159,11 @@ $(document).ready(function() {
             var htm=""
             $("#transactionsList").html("");
             data = JSON.parse(data)
+            if(notificationlength!=data.length){
+                $(".notification").html(data.length)
+                notificationlength=data.length;
+                $(".notification").removeClass("hidden");
+            }
             for (var i in data){
                     var notification = data[i];
                      htm='<li class="list-group-item col-md-12"><div class="col-md-9">'+notification.message+'</div>'
@@ -175,7 +185,10 @@ $(document).ready(function() {
 
 
 
+        $("#activity").on("click",function(){
+            $(".notification").addClass("hidden");
 
+        })
 
 
 
@@ -189,15 +202,20 @@ function addAccountsinUI(details){
     var htm="";
     var members=[];
     for (var i in details){
-           var detail = details[i];
-          $(".payments-list").append('<div><div class="btn btn-sm btn-default col-md-12"> <div class="col-md-4">#'+(1+parseInt(i))+': '+detail.type +'</div><div class="col-md-5">'+detail.acc+'</div><div class="col-md-3"> $'+detail.balance+'</div></div></div>');
+               var detail = details[i];
+               src="http://www.lucciarrosticini.it/shop/images/credit-card-2-icon-7.png"
+               if(detail.type=="CHECKING"){
+                src="https://d30y9cdsu7xlg0.cloudfront.net/png/41986-200.png"
+           }
+          $(".payments-list").append('<div class=""><div class= "user-cards btn btn-sm btn-default col-xs-12"> <div class="col-xs-3"><img class="card-img" src="'+src+'">  <span class="card-type">'+detail.type +'</span></div><div class="col-xs-6">'+detail.acc+'</div><div class="col-xs-3"> $'+detail.balance+'</div></div></div>');
+
             cardNumbers.push(detail.acc)
 
              members.push({"id":detail.acc,"text":detail.type+": "+detail.acc.substring(16,24)})
     }
 
-
-
+         $(".user-cards").removeClass("bold");
+        $(".user-cards:first").addClass("bold");
 
 
 //          $('#addMembers').empty();
@@ -217,4 +235,4 @@ function addAccountsinUI(details){
 }
 
 
-var cardNumbers=[],user_id;
+var cardNumbers=[],user_id,notificationlength;

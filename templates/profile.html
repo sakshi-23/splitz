@@ -50,18 +50,21 @@
         <div class="profile-header">
             <img id="profileImg" src="" class="profileImg">
             <span class="text-center"> SPLITPAY</span>
+             <!--<span class="circle notification hidden"> </span>-->
         </div>
 
         <div class="">
 
 
       <div class="tab-content">
-        <div class="tab-pane fade in " id="tab1">
+        <div class="tab-pane fade in active" id="tab1">
 
 	<div class=" login_box">
 	    <div class="col-md-12 col-xs-12" align="center">
 
-            <div class="outter"><img src="" class="profileImg image-circle"/></div>
+            <div class="outter">
+                <img src="" class="profileImg image-circle"/>
+            </div>
             <span class="profile-name"></span>
 
 	    </div>
@@ -78,17 +81,9 @@
 
         <div class="col-md-12 col-xs-12 login_control">
 
-                <div class="control">
-                    <div class="label">Email Address</div>
-                    <input type="text" class="form-control" value="*****@gmail.com"/>
-                </div>
 
 
 
-                <div class="control">
-                     <div class="label">Phone No.</div>
-                    <input type="password" class="form-control" value="123456"/>
-                </div>
 
                  <div class="control">
                     <div class="label">Payment</div><span style="float:right;" class="glyphicon glyphicon-plus-sign add-account"></span>
@@ -132,7 +127,7 @@
               <button type="button" style="float:right;    margin-top: -10px;" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#myModal">Create</button>
              </h5>
           <ul class="list-group">
-                    <li class="list-group-item"> <div><div class="col-md-2">Desc</div><input placeholder=" Home, School, etc..." class="col-md-10" type="text" name="des" id="name"></div></li>
+                    <li class="list-group-item"> <div><div class="col-md-2">Desc</div><input placeholder=" Home, School, etc..." class="col-md-10" type="text" name="des" id="desc"></div></li>
                     <li class="list-group-item"> <div><div class="col-md-2">Limit</div> <input class="col-md-2" type="number" name="limit" id="limit" value="1000"></div></li>
                     <li class="list-group-item"> <div>Single Use <input checked="checked"  type="checkbox" id="singleuse"></div></li>
                     <li class="list-group-item">
@@ -156,13 +151,64 @@
          
        
         </div>
-          <div class="tab-pane fade in active" id="tab4">
+          <div class="tab-pane fade in " id="tab4">
 
               <ul class="list-group cardgroup">
-                <li class="list-group-item">
+                <li class="list-group-item" ng-repeat="card in cardInfo">
+                <div class="credit-card-div">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                          <div class="row ">
+                            <div class="col-md-6 col-sm-6 col-xs-6 pad-adjust">
+                               <h4>{card.desc}</h4>
+                            </div>
+                            <div class="col-md-6 col-sm-6 col-xs-6 pad-adjust">
+                                <input  class="btn btn-warning btn-block" ng-model="card.amount" />
+                            </div>
+                        </div>
 
+                        <div ng-show="clicked" class="vcardhidden">
+                            <hr>
+                        <div class="row">
+                            <div class="col-md-12 col-sm-12 col-xs-12">
+                                <h5 class="text-muted"> Card Number</h5>
+                            </div>
+                            <div class="col-md-12 col-sm-12 col-xs-12">
+                                <input type="text" class="form-control" placeholder="0000" ng-model="card.vcard.card_number"/>
+                            </div>
+                        </div>
+                        <div class="row ">
+                            <div class="col-md-5 col-sm-5 col-xs-5">
+                                <span class="help-block text-muted small-font"> Exp</span>
+                                <input type="text" class="form-control" placeholder="MM" ng-model="card.vcard.exp"/>
+                            </div>
 
+                            <div class="col-md-3 col-sm-3 col-xs-3">
+                                <span class="help-block text-muted small-font">CCV  </span>
+                                <input type="text" class="form-control" placeholder="CCV" ng-model="card.vcard.ccv"/>
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-3">
+                                <img src="data:image/png;base64,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" class="img-rounded" />
+                            </div>
+                        </div>
+                        <!--<div class="row ">-->
+                            <!--<div class="col-md-12 pad-adjust">-->
+                                <!--<input type="text" class="form-control" placeholder="Name On The Card" />-->
+                            <!--</div>-->
+                        <!--</div>-->
+
+                        <div class="row">
+                            <div class="col-md-12 pad-adjust">
+                               Members <span class="glyphicon glyphicon-plus-sign"></span>
+                            </div>
+                        </div>
+
+                    </div>
+                    </div>
+                </div>
+            </div>
                 </li>
+                   <li class="list-group-item"></li>
 
 
              </ul>
@@ -199,8 +245,8 @@
             </button>
         </div>
         <div class="btn-group" role="group">
-            <button type="button" id="favorites" class="btn btn-default" href="#tab2" data-toggle="tab"><span class="glyphicon glyphicon-credit-card" aria-hidden="true"></span>
-                <div class="hidden-xs">History</div>
+            <button type="button" id="activity" class="btn btn-default" href="#tab2" data-toggle="tab"><span class="glyphicon glyphicon-credit-card" aria-hidden="true"></span>
+                <div class="hidden-xs">Activity <span class="circle notification hidden"> </span></div>
             </button>
         </div>
                   <div class="btn-group create" role="group">
@@ -211,7 +257,7 @@
         </div>
 
         <div class="btn-group" role="group">
-            <button type="button" id="vcardbutton" class="btn btn-default" href="#tab4" data-toggle="tab"><i class="fa fa-group"></i>
+            <button ng-click="getCards()" type="button" id="vcardbutton" class="btn btn-default" href="#tab4" data-toggle="tab"><i class="fa fa-group"></i>
                 <div class="hidden-xs">SplitCards</div>
             </button>
         </div>

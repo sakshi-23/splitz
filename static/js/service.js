@@ -4,26 +4,17 @@ module.service('titleService',titleService)
 function titleService($q,$http,$httpParamSerializer,$filter){
     this.getFlights = getFlights;
 
-    this.getProfile =getProfile;
+    this.getCards =getCards;
 
-    function getProfile(){
-      var settings = {
-          "async": true,
-          "crossDomain": true,
-          "method": "GET",
-          "headers": {
-            "authorization": "Bearer y)5K2GdKzbO7Zv_!kc3Ymj!iseq1-Giq2RKVWRexRhPU)6M_ejGR-phASjBetz4QDCA0GKXHB6FJG3SiP6rN",
-            "content-type": "application/json",
-            "cache-control": "no-cache",
-            "postman-token": "847d1758-8c93-a371-88df-73a75f6c55fb"
-          }
-        }
+    function getCards(){
 
-        fetch("https://private-anon-d6b6dfc913-appintheair.apiary-mock.com/api/v1/me",settings).then(function (response) {
-          return (response.json().data);
-        });
 
-    }
+
+
+           }
+
+
+
 
     function getFlights($scope){
     	 var deferred = $q.defer();
