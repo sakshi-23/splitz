@@ -149,7 +149,7 @@ def create_card():
                 users.update_one({'_id': ObjectId(user_id)}, {'$push': { 'vcard_req_ref': request_id}})
                 send_app_notification(user_id, request_id)
         else:
-            send_out_notification()
+            send_out_notification(owner_user['name'], virtual_card_info['desc'])
     return json.dumps(virtual_card)
 
 
@@ -220,7 +220,7 @@ def get_transactions_user(user_id):
 
 @app.route('/user/<user_id>/notifications', methods=['GET'])
 def get_user_notifications(user_id):
-    user_notifications = notifications.find({'user_id': user_id}).sort('status_code', pymongo.ASCENDING)
+    user_notifications = notifications.find({'user_id': user_id}).sort('datetime', pymongo.DESCENDING)
     n = []
     for un in user_notifications:
         un['notification_id'] = str(un['_id'])
@@ -290,6 +290,7 @@ def insert_notification_create_vcard(user_id, owner_user, amount, amount_percent
                     'You would be charged ' + amount_percent + ' % of the transactions'
     n_obj['status'] = 'pending'
     n_obj['status_code'] = 1
+    n_obj['datetime'] = str(datetime.datetime.now())
     notifications.insert_one(n_obj)
 
 
@@ -301,6 +302,7 @@ def insert_notification_transact(user_id, transaction_info, description ):
                        description
     n_obj['status'] = 'pending'
     n_obj['status_code'] = 5
+    n_obj['datetime'] =  str(datetime.datetime.now())
     notifications.insert_one(n_obj)
 
 
@@ -327,17 +329,18 @@ def update_balances(user_id, account, amount):
 def send_app_notification(user_id, request_id):
     print("In app notification sent to "+str(user_id))
 
-def send_out_notification():
+def send_out_notification(owner_name, desc):
     #add twilio part here
     me = 'satyajeet.gawas@gmail.com'
     r = requests.post(
         'https://api.mailgun.net/v3/sandboxc318d417ffda46d98f87f0ce470db316.mailgun.org/messages',
         auth=("api", "key-a768915cc867eee8b93a442f0e1948e7"),
         data={
-            "subject": "My subject",
+            "subject": "Hello from SplitPay",
             "from": me,
             "to": "satyajeet.gawas@gmail.com",
-            "text": "The text"
+            "text": owner_name+ " wants to add you to Split Card "+desc+" . Please accept the payment request within 5 days by signing"
+                                " up on SplitPay. Thank you!!"
         }
     )
     print r.status_code, r.reason,r.text
