@@ -55,14 +55,15 @@ def shopping():
 @app.route('/register', methods=['POST'])
 def create_user():
     new_user = request.get_json(silent=True)
-    user = users.find_one({'email_id': new_user['email_id']})
+    user = users.find_one({'facebook_id': new_user['facebook_id']})
     if user is None:
         new_user['my_vcards'] = []
         new_user['vcards'] = []
-        id = users.insert_one(new_user).inserted_id
-        return '{user_id :'+str(id)+'}'
-    else:
-        return 'User exists'
+        user = users.insert_one(new_user)
+    user['user_id'] = str(user['_id'])
+    del(user['_id'])
+    return json.dumps(user)
+
 
 
 @app.route('/login', methods=['POST'])
@@ -80,6 +81,14 @@ def login():
     else:
         return 'User does not exist'
 
+
+@app.route('/add_accounts', methods=['POST'])
+def add_account():
+    account_info = request.get_json(silent=True)
+    user_id = account_info['user_id']
+    accounts = account_info['accounts']
+    users.update_one({'_id':ObjectId(user_id)}, {'$addToSet' : { 'accounts': {'$each':accounts}}})
+    return 'Account Added'
 
 
 @app.route('/create_group', methods=['POST'])
@@ -116,21 +125,14 @@ def create_card():
     request_id = str(request_id)
     virtual_card = generate_virtual_card(request_id)
     owner_id = virtual_card_info['owner_user_id']
-    users.update_one({'_id': ObjectId(owner_id)}, {'$push': {'my_vcards': str(request_id)}})
+    users.update_one({'_id': ObjectId(owner_id)}, {'$push': {'my_vcards': virtual_card['vcard_id'], 'vcard_req_ref': request_id }})
     accounts = virtual_card_info['accounts']
     for account in accounts:
         if account['user_exists'] :
             user_id = account['user_id']
-            amount  = account['amount']
-            payment_methods = {}
-            payment_methods['vcard_ref'] = virtual_card['vcard_id']
-            payment_details = {}
-            payment_details['amount'] = amount
-            if 'payment_specified' in account :
-                payment_details['payment_method'] = account['payment_method']
-            payment_methods['payment_details'] = payment_details
-            users.update_one({'_id': ObjectId(user_id)}, {'$push': {'vcards': payment_methods}})
-            send_app_notification(user_id, request_id)
+            if user_id != owner_id:
+                users.update_one({'_id': ObjectId(user_id)}, {'$push': {'vcards': virtual_card['vcard_id'], 'vcard_req_ref': request_id}})
+                send_app_notification(user_id, request_id)
         else:
             send_out_notification(account)
     del(virtual_card['_id'])
@@ -141,10 +143,11 @@ def create_card():
 def get_user_cards(user_id):
     user = users.find_one({'_id':ObjectId(user_id)})
     user_vcards = user['vcards']
+    user_vcards.extend(user['my_vcards'])
     cards = []
     for vcard in user_vcards:
-        card = vcards.find_one({'_id': ObjectId(vcard['vcard_ref'])})
-        card['vcard_id'] = vcard['vcard_ref']
+        card = vcards.find_one({'_id': ObjectId(vcard)})
+        card['vcard_id'] = vcard
         del(card['_id'])
         cards.append(card)
     return json.dumps(cards)
