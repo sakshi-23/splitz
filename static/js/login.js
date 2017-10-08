@@ -48,10 +48,26 @@ function statusChangeCallback(response){
 
     FB.api(
     "/"+response.authResponse.userID,
-        function (response) {
-          if (response && !response.error) {
-            console.log(response.name)
-            $(".profile-name").html(response.name);
+        function (responsename) {
+          if (responsename && !responsename.error) {
+
+            $(".profile-name").html(responsename.name);
+             $.ajax({
+            type: "POST",
+            url: "/register",
+            data: JSON.stringify({"facebook_id":response.authResponse.userID,"name":responsename.name}),
+
+            dataType: "json",
+               headers: {
+          'Content-Type': 'application/json',
+      },
+            success: function(data){
+               console.log(data);
+            },
+            failure: function(errMsg) {
+                console.log(errMsg);
+            }
+        });
           }
         }
     );
