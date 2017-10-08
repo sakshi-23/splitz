@@ -7,18 +7,15 @@
     });
     FB.AppEvents.logPageView();
 
-    if( window.location.pathname=="/"){
-      FB.login(function(response) {
-             checkLoginState()
-        }, {scope: 'public_profile,email,user_friends'});
-    }
-    else
-    {   FB.getLoginStatus(function(response) {
+    if( window.location.pathname!="/"){
+      FB.getLoginStatus(function(response) {
         statusChangeCallback(response);
 
     });
-}
-
+    }
+//    FB.onlogin(function(response) {
+//             checkLoginState()
+//        }, {scope: 'public_profile,email,user_friends'});
   };
 
   (function(d, s, id){
@@ -54,6 +51,7 @@ function statusChangeCallback(response){
         function (response) {
           if (response && !response.error) {
             console.log(response.name)
+            $(".profile-name").html(response.name);
           }
         }
     );
@@ -67,5 +65,14 @@ function statusChangeCallback(response){
       }
     }
     );
+
+    FB.api(
+    "/"+response.authResponse.userID+"/picture",
+    function (response) {
+      if (response && !response.error) {
+        $(".profileImg").attr("src",response.data.url);
+      }
+    }
+);
 
 }

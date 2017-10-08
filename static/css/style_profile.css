@@ -258,15 +258,15 @@ box-shadow:         0px 0px 8px 0px rgba(50, 50, 50, 0.54);
     font-size: 10p;
 }
 
-.form-control:focus{
+/*.form-control:focus{
     border-radius: 0px;
-    border-bottom: 1px solid #FC563B;
-    margin-bottom: 10px;
-    outline: none;
+    /*border-bottom: 1px solid #FC563B;*/
+    /*margin-bottom: 10px;*/
+/*    outline: none;
     -webkit-box-shadow: none !important;
     -moz-box-shadow: none !important;
     box-shadow: none !important;
-}
+}*/*/
 .btn-orange{
     background-color: #FC563B;
     border-radius: 0px;
@@ -371,4 +371,41 @@ input:checked + .slider:before {
 
 .slider.round:before {
   border-radius: 50%;
+}
+
+.show-accounts{
+      display: block;
+    width: 100%;
+    background: #e3c5b6;
+    position: relative;
+    height: 59px;
+    margin: 5px;
+    padding: 3px;
+
+}
+
+.payments-list .btn-sm{
+  text-align: left;
+
+}
+
+#tab3{
+  padding: 10px;
+
+}
+
+#tab3 input{
+      float: inherit;
+      padding: 0px;
+
+}
+
+#tab3 .list-group-item div{
+  padding: 0;
+
+}
+
+#paymentSplit{
+
+
 }
