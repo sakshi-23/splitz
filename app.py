@@ -127,6 +127,7 @@ def create_card():
     virtual_card_info = request.get_json(silent=True)
     virtual_card = generate_virtual_card()
     virtual_card['max_amount'] = virtual_card_info['amount']
+    virtual_card_info['vcard'] = virtual_card
     owner_id = virtual_card_info['owner_user_id']
     request_id = vcards_request.insert_one(virtual_card_info).inserted_id
     request_id = str(request_id)
@@ -284,7 +285,7 @@ def insert_notification_transact(user_id, transaction_info, description ):
                      ' was made with split card ' + \
                        description
     n_obj['status'] = 'pending'
-    n_obj['status_code'] = 1
+    n_obj['status_code'] = 5
     notifications.insert_one(n_obj)
 
 def update_balances(user_id, vcard_req, amount):
