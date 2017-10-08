@@ -168,7 +168,7 @@ $(document).ready(function() {
                     var notification = data[i];
                      htm='<li class="list-group-item col-md-12"><div class="col-md-9">'+notification.message+'</div>'
                      if (notification.status_code==1){
-                        htm+='<div class="col-md-3"><button class="btn btn-xs btn-default"><span class="accept glyphicon glyphicon-ok"></button><button class="btn btn-xs btn-default"></span><span class="glyphicon glyphicon-remove"></span></button></div>'
+                        htm+='<div class="col-md-3"><button class="btn btn-xs btn-default"><span owner_id="'+notification.owner_id+'" data-id="'+notification.notification_id+'" class="accept glyphicon glyphicon-ok"></button><button class="btn btn-xs btn-default"></span><span class="glyphicon glyphicon-remove"></span></button></div>'
                      }
                      htm+='</li>'
                      $("#transactionsList").append(htm);
@@ -196,6 +196,30 @@ $(document).ready(function() {
         $(".shopping").addClass("hidden");
 
     });
+
+    $("body").on("click",".glyphicon-ok",function(){
+
+       data= [{"status": "approve", "notification_id": $(this).attr("data-id"), "user_id": user_id, "status_code": 2, "message": "", "owner_id": $(this).attr("owner_id")}]
+        $.ajax({
+                type: "POST",
+                url: "/manage-notification",
+                data: JSON.stringify(data),
+
+                dataType: "json",
+                   headers: {
+                  'Content-Type': 'application/json',
+
+                  },
+                success: function(data){
+
+                },
+                failure: function(errMsg) {
+                    console.log(errMsg);
+                }
+                });
+
+
+    })
 
     $(".populate").on("click",function(){
 
