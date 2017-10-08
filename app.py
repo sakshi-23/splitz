@@ -8,8 +8,10 @@ from bson.objectid import ObjectId
 import sys
 from random import randint
 import datetime
-import smtplib
-from email.mime.text import MIMEText
+import requests
+
+
+
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -147,7 +149,7 @@ def create_card():
                 users.update_one({'_id': ObjectId(user_id)}, {'$push': { 'vcard_req_ref': request_id}})
                 send_app_notification(user_id, request_id)
         else:
-            send_out_notification(account)
+            send_out_notification()
     return json.dumps(virtual_card)
 
 
@@ -250,6 +252,12 @@ def manage_notification():
     nt = request.get_json(silent=True)
     nt_id = nt['notification_id']
     notifications.update_one({'_id':ObjectId(nt_id)}, {'$set' : {'status' : nt['status'], 'status_code' : 2}})
+    ont = {}
+    ont['user_id'] = nt['owner_id']
+    user = users.find_one({'_id':ObjectId(nt['user_id'])})
+    ont['message'] = user['name']+' has accepted your Split Card request'
+    ont['status'] = 5
+    notifications.insert_one(ont)
     return 'Notification status updated'
 
 
@@ -319,19 +327,22 @@ def update_balances(user_id, account, amount):
 def send_app_notification(user_id, request_id):
     print("In app notification sent to "+str(user_id))
 
-def send_out_notification(account):
+def send_out_notification():
     #add twilio part here
-    # me = 'satyajeet.gawas@gmail.com'
-    # you = '4048836618@tmomail.net'
-    #
-    # msg = MIMEText('Hi!\nHow are you?', 'plain')
-    # msg['Subject'] = 'SplitPay'
-    # msg['From'] = me
-    # msg['To'] = you
-    # s = smtplib.SMTP('localhost')
-    # s.sendmail(me, [you], msg.as_string())
-    # s.quit()
-    print (account)
+    me = 'satyajeet.gawas@gmail.com'
+    r = requests.post(
+        'https://api.mailgun.net/v3/sandboxc318d417ffda46d98f87f0ce470db316.mailgun.org/messages',
+        auth=("api", "key-a768915cc867eee8b93a442f0e1948e7"),
+        data={
+            "subject": "My subject",
+            "from": me,
+            "to": "satyajeet.gawas@gmail.com",
+            "text": "The text"
+        }
+    )
+    print r.status_code, r.reason,r.text
+
+        # print (account)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=port, debug=True)
