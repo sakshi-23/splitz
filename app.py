@@ -8,6 +8,8 @@ from bson.objectid import ObjectId
 import sys
 from random import randint
 import datetime
+import smtplib
+from email.mime.text import MIMEText
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -128,6 +130,7 @@ def create_card():
     virtual_card = generate_virtual_card()
     virtual_card['max_amount'] = virtual_card_info['amount']
     virtual_card_info['vcard'] = virtual_card
+    virtual_card_info['datetime'] = str(datetime.datetime.now())
     owner_id = virtual_card_info['owner_user_id']
     request_id = vcards_request.insert_one(virtual_card_info).inserted_id
     request_id = str(request_id)
@@ -141,7 +144,7 @@ def create_card():
             elif 'user_id' in account:
                 user_id = account['user_id']
             if len(user_id) !=0 and user_id != owner_id:
-                insert_notification_create_vcard(user_id, owner_user['name'], virtual_card_info['amount'], account['amount']  )
+                insert_notification_create_vcard(user_id, owner_user, virtual_card_info['amount'], account['amount']  )
                 users.update_one({'_id': ObjectId(user_id)}, {'$push': { 'vcard_req_ref': request_id}})
                 send_app_notification(user_id, request_id)
         else:
@@ -160,6 +163,7 @@ def get_user_cards(user_id):
         card = vcards_request.find_one({'_id': ObjectId(vcard)})
         del(card['_id'])
         cards.append(card)
+    cards.sort(key=lambda x: x['datetime'], reverse=True)
     return json.dumps(cards)
 
 
@@ -171,9 +175,9 @@ def transact():
     transaction_info['date'] = str(datetime.datetime.now())
     transaction_id = transactions.insert_one(transaction_info).inserted_id
     transaction_id = str(transaction_id)
-    vcard_ref = transaction_info['vcard_id']
-    my_vcard = vcards.find_one_and_update({'_id':ObjectId(vcard_ref)}, {'$push': {'transactions': transaction_id}})
-    vcard_req = vcards_request.find_one({'_id':ObjectId(my_vcard['vcard_req_ref'])})
+    # vcard_ref = transaction_info['vcard_id']
+    # my_vcard = vcards.find_one_and_update({'_id':ObjectId(vcard_ref)}, {'$push': {'transactions': transaction_id}})
+    vcard_req = vcards_request.find_one({'_id':ObjectId(transaction_info['vcard_req_id'])})
     for account in vcard_req['accounts']:
         if account['user_exists']:
             user_id = ''
@@ -186,8 +190,8 @@ def transact():
             transaction_info['transaction_id'] = transaction_id
             account['transaction_info'] = transaction_info
             user_transactions.insert_one(account).inserted_id
-            update_balances(user_id, vcard_req, transaction_info['amount'])
-            insert_notification_transact(account['user_id'], transaction_info, vcard_req['description'] )
+            update_balances(user_id, account, transaction_info['amount'])
+            insert_notification_transact(user_id, transaction_info, vcard_req['desc'] )
     transaction_res = {}
     transaction_res['transaction_id'] = transaction_id
     transaction_res['status'] = 'success'
@@ -224,9 +228,12 @@ def get_user_notifications(user_id):
     return json.dumps(n)
 
 
+
 @app.route('/group/<group_id>/transactions', methods=['GET'])
 def get_transactions_group(group_id):
     return []
+
+
 
 @app.route('/vcard/<card_id>/transactions')
 def get_transactions_card(card_id):
@@ -268,10 +275,11 @@ def random_with_N_digits(n):
 
 
 
-def insert_notification_create_vcard(user_id, owner_name, amount, amount_percent ):
+def insert_notification_create_vcard(user_id, owner_user, amount, amount_percent ):
     n_obj = {}
     n_obj['user_id'] = user_id
-    n_obj['message'] = owner_name + ' has created a spending card with max limit $' + amount + '. ' \
+    n_obj['owner_id'] = str(owner_user['_id'])
+    n_obj['message'] = owner_user['name'] + ' has created a spending card with max limit $' + amount + '. ' \
                     'You would be charged ' + amount_percent + ' % of the transactions'
     n_obj['status'] = 'pending'
     n_obj['status_code'] = 1
@@ -288,11 +296,24 @@ def insert_notification_transact(user_id, transaction_info, description ):
     n_obj['status_code'] = 5
     notifications.insert_one(n_obj)
 
-def update_balances(user_id, vcard_req, amount):
-    user = users.find_one({'_id':user_id})
-    # for acc in user['accounts']:
-    #     # if
-    return ''
+
+
+def update_balances(user_id, account, amount):
+    user = users.find_one({'_id':ObjectId(user_id)})
+    i=0
+    exists = False
+    if 'accounts' not in user:
+        return
+    for acc in user['accounts']:
+        if account['user_exists'] and account['id'] == acc['acc']:
+            percent = account['amount']
+            amt_deduct = (float(percent) * float(amount)) / 100;
+            new_balance = float(acc['balance'])-amt_deduct
+            exists = True
+            break
+        i = i + 1
+    if exists:
+        users.update_one({'_id':ObjectId(user_id), 'accounts.acc':account['id']}, {'$set': {'accounts.'+str(i)+'.balance': new_balance}})
 
 
 
@@ -301,6 +322,16 @@ def send_app_notification(user_id, request_id):
 
 def send_out_notification(account):
     #add twilio part here
+    # me = 'satyajeet.gawas@gmail.com'
+    # you = '4048836618@tmomail.net'
+    #
+    # msg = MIMEText('Hi!\nHow are you?', 'plain')
+    # msg['Subject'] = 'SplitPay'
+    # msg['From'] = me
+    # msg['To'] = you
+    # s = smtplib.SMTP('localhost')
+    # s.sendmail(me, [you], msg.as_string())
+    # s.quit()
     print (account)
 
 if __name__ == '__main__':
