@@ -125,11 +125,12 @@ def get_user_groups(user_id):
 @app.route('/create_vcard', methods=['POST'])
 def create_card():
     virtual_card_info = request.get_json(silent=True)
+    virtual_card = generate_virtual_card()
+    virtual_card['max_amount'] = virtual_card_info['amount']
+    owner_id = virtual_card_info['owner_user_id']
     request_id = vcards_request.insert_one(virtual_card_info).inserted_id
     request_id = str(request_id)
-    virtual_card = generate_virtual_card(request_id)
-    owner_id = virtual_card_info['owner_user_id']
-    owner_user = users.find_one_and_update({'_id': ObjectId(owner_id)}, {'$push': {'my_vcards': virtual_card['vcard_id'], 'vcard_req_ref': request_id }})
+    owner_user = users.find_one_and_update({'_id': ObjectId(owner_id)}, {'$push': {'vcard_req_ref': request_id }})
     accounts = virtual_card_info['accounts']
     for account in accounts:
         if account['user_exists'] :
@@ -139,33 +140,28 @@ def create_card():
             elif 'user_id' in account:
                 user_id = account['user_id']
             if len(user_id) !=0 and user_id != owner_id:
-                n_obj = {}
-                n_obj['user_id'] = user_id
-                n_obj['message'] = owner_user['name'] + ' has created a spending card with max limit $'+virtual_card_info['amount']+'. ' \
-                                   'You would be charged '+account['amount']+' % of the transactions'
-                n_obj['status'] = 'pending'
-                n_obj['status_code'] = 1
-                notifications.insert_one(n_obj)
-                users.update_one({'_id': ObjectId(user_id)}, {'$push': {'vcards': virtual_card['vcard_id'], 'vcard_req_ref': request_id}})
+                insert_notification_create_vcard(user_id, owner_user['name'], virtual_card_info['amount'], account['amount']  )
+                users.update_one({'_id': ObjectId(user_id)}, {'$push': { 'vcard_req_ref': request_id}})
                 send_app_notification(user_id, request_id)
         else:
             send_out_notification(account)
-    del(virtual_card['_id'])
     return json.dumps(virtual_card)
+
+
 
 
 @app.route('/user/<user_id>/vcards', methods=['GET'])
 def get_user_cards(user_id):
     user = users.find_one({'_id':ObjectId(user_id)})
-    user_vcards = user['vcards']
-    user_vcards.extend(user['my_vcards'])
+    user_vcards = user['vcard_req_ref']
     cards = []
     for vcard in user_vcards:
-        card = vcards.find_one({'_id': ObjectId(vcard)})
-        card['vcard_id'] = vcard
+        card = vcards_request.find_one({'_id': ObjectId(vcard)})
         del(card['_id'])
         cards.append(card)
     return json.dumps(cards)
+
+
 
 
 @app.route('/transact', methods=['POST'])
@@ -179,20 +175,24 @@ def transact():
     vcard_req = vcards_request.find_one({'_id':ObjectId(my_vcard['vcard_req_ref'])})
     for account in vcard_req['accounts']:
         if account['user_exists']:
+            user_id = ''
+            if 'facebook_id' in account:
+                user_id = str(users.find_one({'facebook_id': account['facebook_id']})['_id'])
+            elif 'user_id' in account:
+                user_id = account['user_id']
+            if len(user_id) == 0:
+                continue
             transaction_info['transaction_id'] = transaction_id
             account['transaction_info'] = transaction_info
             user_transactions.insert_one(account).inserted_id
-            n_obj = {}
-            n_obj['user_id'] = account['user_id']
-            n_obj['message'] = 'Purchase of '+transaction_info['amount']+' at '+transaction_info['merchant_name']+'' \
-                            ' was made with split card '+ vcard_req['description']
-            n_obj['status'] = 'pending'
-            n_obj['status_code'] = 1
-            notifications.insert_one(n_obj)
+            update_balances(user_id, vcard_req, transaction_info['amount'])
+            insert_notification_transact(account['user_id'], transaction_info, vcard_req['description'] )
     transaction_res = {}
     transaction_res['transaction_id'] = transaction_id
     transaction_res['status'] = 'success'
     return json.dumps(transaction_res)
+
+
 
 
 @app.route('/user/<user_id>/transactions', methods=['GET'])
@@ -210,6 +210,7 @@ def get_transactions_user(user_id):
         ut_dict['merchant_name'] = ut['transaction_info']['merchant_name']
         res_transactions.append(ut_dict)
     return json.dumps(res_transactions)
+
 
 @app.route('/user/<user_id>/notifications', methods=['GET'])
 def get_user_notifications(user_id):
@@ -245,7 +246,7 @@ def manage_notification():
     return 'Notification status updated'
 
 
-def generate_virtual_card(request_id):
+def generate_virtual_card():
     card_number = random_with_N_digits(16)
     ccv = random_with_N_digits(3)
     card = vcards.find_one({'card_number' : card_number})
@@ -256,17 +257,42 @@ def generate_virtual_card(request_id):
     card['card_number'] = card_number
     card['ccv'] = ccv
     card['exp'] = '01/21'
-    card['vcard_req_ref'] = request_id
-    card_id = vcards.insert_one(card).inserted_id
-    card_id = str(card_id)
-    card['vcard_id'] = card_id
-    vcards_request.update_one({'_id':ObjectId(request_id)}, {'$set' : {"vcard_ref":card_id}})
     return card
 
 def random_with_N_digits(n):
     range_start = 10 ** (n - 1)
     range_end = (10 ** n) - 1
     return str(randint(range_start, range_end))
+
+
+
+
+def insert_notification_create_vcard(user_id, owner_name, amount, amount_percent ):
+    n_obj = {}
+    n_obj['user_id'] = user_id
+    n_obj['message'] = owner_name + ' has created a spending card with max limit $' + amount + '. ' \
+                    'You would be charged ' + amount_percent + ' % of the transactions'
+    n_obj['status'] = 'pending'
+    n_obj['status_code'] = 1
+    notifications.insert_one(n_obj)
+
+
+def insert_notification_transact(user_id, transaction_info, description ):
+    n_obj = {}
+    n_obj['user_id'] = user_id
+    n_obj['message'] = 'Purchase of ' + transaction_info['amount'] + ' at ' + transaction_info['merchant_name'] + '' \
+                     ' was made with split card ' + \
+                       description
+    n_obj['status'] = 'pending'
+    n_obj['status_code'] = 1
+    notifications.insert_one(n_obj)
+
+def update_balances(user_id, vcard_req, amount):
+    user = users.find_one({'_id':user_id})
+    # for acc in user['accounts']:
+    #     # if
+    return ''
+
 
 
 def send_app_notification(user_id, request_id):
