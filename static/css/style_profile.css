@@ -409,3 +409,25 @@ input:checked + .slider:before {
 
 
 }
+
+.bootstrap-select.btn-group .dropdown-toggle .filter-option{
+        font-size: 10px;
+}
+
+.bootstrap-select>.dropdown-toggle{
+    padding:5px;
+}
+
+
+.modal-dialog{
+    width:250px;
+    margin:150px auto;
+}
+
+#transactionsList li{
+    padding-left: 0;
+}
+
+.select2-container{
+    min-width:200px;
+}

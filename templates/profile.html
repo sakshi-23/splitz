@@ -14,12 +14,34 @@
     <script src="static/js/controller.js"></script>
     <script src="static/js/service.js"></script>
     <script src="static/js/login.js"></script>
-
+    <script src="static/js/library/jquery.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.4/js/select2.min.js"></script>
 
 
 
 </head>
 <body ng-app="myApp"  ng-controller="Controller">
+         <div class="modal fade" id="myModal" role="dialog">
+                <div class="modal-dialog">
+
+                  <!-- Modal content-->
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal">&times;</button>
+                      <h4 class="modal-title">Terms and Conditions</h4>
+                    </div>
+                    <div class="modal-body">
+                      <p>You will pay the specified percentage unless any member in your group declines the payment.
+                          You agree to pay the full amount for any of the members who do not accept the transaction within 5 days.</p>
+                    </div>
+                    <div class="modal-footer">
+                      <button id="createCard" data-dismiss="modal" class="btn btn-default btn-sm" type="button">Agree</button>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
         <div  class="outer">
         <div class="col-lg-4 col-xs-12" style="margin:auto">
             <div id="profile-dp" class=" " >
@@ -31,8 +53,10 @@
         </div>
 
         <div class="">
+
+
       <div class="tab-content">
-        <div class="tab-pane fade in active" id="tab1">
+        <div class="tab-pane fade in " id="tab1">
 
 	<div class=" login_box">
 	    <div class="col-md-12 col-xs-12" align="center">
@@ -70,7 +94,7 @@
                     <div class="label">Payment</div><span style="float:right;" class="glyphicon glyphicon-plus-sign add-account"></span>
                     <div class="show-accounts hidden">
                         <div class="input-group col-md-12">
-                    <input type="text" id="accountId" class="form-control input-sm" placeholder="Enter US Bank Id">
+                    <input type="text" value="913995730031830909" id="accountId" class="form-control input-sm" placeholder="Enter US Bank Id">
                     <span class="input-group-btn">
                         <button class="btn btn-default btn-sm" type="button" id="addIdButon">
                             Done
@@ -101,28 +125,30 @@
                         </button>
                     </span>
                 </div>
-         <ul class="list-group">
-                    <li class="list-group-item"><strong>Satya</strong> added you to the group <strong>Home</strong></li>
-                    <li class="list-group-item"><strong>Seema</strong> accepted your request for group <strong>School</strong></li>
-                   <li class="list-group-item"><strong>You</strong> were charged $900 for   <strong>trn#91112</strong></li>
-             <li class="list-group-item"><strong>You</strong> were charged $200 for   <strong>trn#20202</strong></li>
-             <li class="list-group-item"><strong>You</strong> were charged $100 for<strong> trn#12902</strong></li>
-             <li class="list-group-item"><strong>Rudra</strong> accepted your request for group <strong>School</strong></li>
-              <li class="list-group-item"><strong>Vibhor</strong> accepted your request for group <strong>School</strong></li>
-                </ul>
+         <ul id="transactionsList" class="list-group"></ul>
         </div>
-        <div class="tab-pane fade in " id="tab3">
-          <h5>Add a new SplitCard  <button id="createCard" class="btn btn-default btn-sm" type="button">Create</button></h5>
+        <div class="tab-pane fade in  " id="tab3">
+          <h5>Add a new SplitCard
+              <button type="button" style="float:right;    margin-top: -10px;" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#myModal">Create</button>
+             </h5>
           <ul class="list-group">
-                    <li class="list-group-item"> <div><div class="col-md-2">Header</div><input class="col-md-10" type="number" name="limit" id="name"></div></li>
-                    <li class="list-group-item"> <div><div class="col-md-2">Limit</div> <input class="col-md-2" type="number" name="limit" id="limit"></div></li>
-                    <li class="list-group-item"> <div>Single Use<input checked="checked"  type="checkbox" id="use"></div></li>
-                    <li class="list-group-item"><div > <div class="col-md-2">Add</div> <input type="text" name="" class="col-md-10" placeholder="Enter email,userId or self-accounts"></div>
+                    <li class="list-group-item"> <div><div class="col-md-2">Desc</div><input placeholder=" Home, School, etc..." class="col-md-10" type="text" name="des" id="name"></div></li>
+                    <li class="list-group-item"> <div><div class="col-md-2">Limit</div> <input class="col-md-2" type="number" name="limit" id="limit" value="1000"></div></li>
+                    <li class="list-group-item"> <div>Single Use <input checked="checked"  type="checkbox" id="singleuse"></div></li>
+                    <li class="list-group-item">
+                        <div > <div class="col-md-2">Add</div>
+                       <select class="col-md-10" id="addMembers"  multiple="multiple">
+
+                        </select>
+                         </div>
                     </li>
-                    <li class="list-group-item"><div > <div class="col-md-10">Payment Split <span class="Equally">Equally</span></div> <span id="paymentSplit" class="glyphicon glyphicon-plus-sign"></span></div>
-                    </li>
-                    <li class="list-group-item show-split hidden">
-                        <div><div class="col-md-8">Name</div> <input class="col-md-3" type="number" name="limit" class="amount">
+                    <li class="list-group-item">
+                        <div style="height:30px;">
+                        <div class="col-md-10"><h5>Payment split <i><span class="Equally">Equally</span></i></h5></div>
+                        <!--<span id="paymentSplit" class="glyphicon glyphicon-plus-sign"></span>-->
+                    </div>
+                     <div class="show-split ">
+
                         </div>
                     </li>
 
@@ -130,8 +156,16 @@
          
        
         </div>
-          <div class="tab-pane fade in" id="tab4">
-          <h3>This is tab 4</h3>
+          <div class="tab-pane fade in active" id="tab4">
+
+              <ul class="list-group cardgroup">
+                <li class="list-group-item">
+
+
+                </li>
+
+
+             </ul>
         </div>
           <div class="tab-pane fade in" id="tab5">
 
@@ -170,13 +204,14 @@
             </button>
         </div>
                   <div class="btn-group create" role="group">
-            <button type="button" id="create" class="btn btn-default" href="#tab3" data-toggle="tab"><span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
+            <button type="button" id="create" class="btn btn-default" href="#tab3" data-toggle="tab">
+                <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
 
             </button>
         </div>
 
         <div class="btn-group" role="group">
-            <button type="button" id="following" class="btn btn-default" href="#tab4" data-toggle="tab"><i class="fa fa-group"></i>
+            <button type="button" id="vcardbutton" class="btn btn-default" href="#tab4" data-toggle="tab"><i class="fa fa-group"></i>
                 <div class="hidden-xs">SplitCards</div>
             </button>
         </div>
@@ -193,7 +228,8 @@
             </div>
 
 
-    <script src="static/js/library/jquery.js"></script>
+
+
     <script src="static/js/library/pooper.min.js"></script>
      <script src="static/js/library/bootstrap.min.js"></script>
      <script src="static/js/app.js"></script>

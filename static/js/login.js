@@ -62,7 +62,10 @@ function statusChangeCallback(response){
           'Content-Type': 'application/json',
       },
             success: function(data){
-               console.log(data);
+              user_id = data.user_id
+              if ("accounts" in data){
+                addAccountsinUI(data.accounts)
+              }
             },
             failure: function(errMsg) {
                 console.log(errMsg);
@@ -77,9 +80,35 @@ function statusChangeCallback(response){
     function (response) {
       if (response && !response.error) {
         /* handle the result */
-        console.log(response.data[0].name)
-      }
+        data= response.data;
+        var members = [];
+        for (var i in data){
+
+             members.push({"id":data[i].id,"text":data[i].name});
+        }
+
+          $('#addMembers').empty();
+        $('#addMembers').select2({
+            data: [{
+                  id      : 200,
+                  text    : 'Friends',
+                  children: members
+                }],
+             tags: true,
+           placeholder: "Add members",
+            allowClear: true
+        });
+//
     }
+
+
+
+
+
+
+
+      }
+
     );
 
     FB.api(
