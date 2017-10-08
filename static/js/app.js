@@ -89,64 +89,7 @@ $(document).ready(function() {
 	 });
 
 
-	 $("#createCard").on("click",function(){
 
-
-	    var accounts=[];
-	    var val= $("#addMembers").select2('data');
-	    for (var i in val){
-	        var member = val[i];
-
-	        if(!("_resultId"  in member)){
-	            member["user_exists"] = true;
-	            if(member["id"].indexOf("*")!=-1){
-                    member["user_id"] = user_id
-                    }
-                else
-                {
-                    member["facebook_id"] = member["id"]
-
-                }
-	        }
-	        else{
-	             member["user_exists"] = false
-	        }
-
-
-	        member["amount"]=$('[data-id="'+member.id+'"]').val();
-            accounts.push(member)
-	    }
-
-	   var data= {
-            "amount" : $("#limit").val(),
-            "single_use" : $("#singleuse").val()=='on'?true:false,
-            "owner_user_id" : user_id,
-            "accounts": accounts,
-            "desc": $("#desc").val()
-        }
-
-          $.ajax({
-                type: "POST",
-                url: "/create_vcard",
-                data: JSON.stringify(data),
-
-                dataType: "json",
-                   headers: {
-                  'Content-Type': 'application/json',
-
-                  },
-                success: function(data){
-                         console.log(data);
-                         $("#vcardbutton").trigger("click");
-
-                },
-                failure: function(errMsg) {
-                    console.log(errMsg);
-                }
-                });
-
-
-	 });
 
 //	 $("#vcardbutton").on("click",function(){
 //
@@ -199,10 +142,10 @@ $(document).ready(function() {
 
     $("body").on("click",".glyphicon-ok",function(){
 
-       data= [{"status": "approve", "notification_id": $(this).attr("data-id"), "user_id": user_id, "status_code": 2, "message": "", "owner_id": $(this).attr("owner_id")}]
+       data= {"status": "approve", "notification_id": $(this).attr("data-id"), "user_id": user_id, "status_code": 2, "message": "", "owner_id": $(this).attr("owner_id")}
         $.ajax({
                 type: "POST",
-                url: "/manage-notification",
+                url: "/manage_notification",
                 data: JSON.stringify(data),
 
                 dataType: "json",
@@ -252,11 +195,11 @@ $(document).ready(function() {
 
 
             var details= {
-                "vcard_req_id" : "59da4339113de204435f09f4",
+                "vcard_req_id" : "59da68a6113de209f806658b",
                 "card_number" : "6407073014871305",
-                "amount" : "200",
+                "amount" : "1294.84",
                 "exp" : "01/21",
-                "ccv" : "1294.84",
+                "ccv" : "100",
                 "merchant_name":"Medical Hospital"
             }
 
