@@ -116,6 +116,7 @@ function statusChangeCallback(response){
     function (response) {
       if (response && !response.error) {
         $(".profileImg").attr("src",response.data.url);
+        $(".profileImg").removeClass("hidden");
       }
     }
 );

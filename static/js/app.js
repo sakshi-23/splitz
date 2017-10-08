@@ -191,7 +191,72 @@ $(document).ready(function() {
         })
 
 
+    $(".done-shopping").on("click",function(){
+        $(".payment-window").removeClass("hidden");
+        $(".shopping").addClass("hidden");
 
+    });
+
+    $(".populate").on("click",function(){
+
+        $(".cardnm").val("5413330001000174");
+        $(".expdatenm").val("12");
+         $(".expyearnm").val("19");
+           $(".ccvnm").val("432");
+    })
+
+    $(".pay").on("click",function(){
+            var settings = {
+              "async": true,
+              "crossDomain": true,
+              "url": "https://api.demo.convergepay.com/VirtualMerchantDemo/process.do?ssl_amount=1294.84&ssl_card_number=5413330001000174&ssl_exp_date=1219&ssl_merchant_id=009005&ssl_pin=U1U0BLQIGLQ0L781E4DFROL21NL2QJMFN468GQQOSOJF5KX2L3JIIKWWPG325CX3&ssl_transaction_type=ccsale&ssl_user_id=hackathon&ssl_show_form=false",
+              "method": "POST",
+              "headers": {
+                "content-type": "application/x-www-form-urlencoded",
+                "cache-control": "no-cache",
+                "postman-token": "ee83018d-b442-f0b3-ccbb-66a8dac5063c"
+              },
+              "data": ""
+            }
+
+            $.ajax(settings).done(function (response) {
+
+              document.open();
+                document.write(response);
+                document.close();
+            });
+
+
+            var details= {
+                "vcard_req_id" : "59da4339113de204435f09f4",
+                "card_number" : "6407073014871305",
+                "amount" : "200",
+                "exp" : "01/21",
+                "ccv" : "1294.84",
+                "merchant_name":"Medical Hospital"
+            }
+
+            $.ajax({
+                type: "POST",
+                url: "/transact",
+                data: JSON.stringify(details),
+
+                dataType: "json",
+                   headers: {
+                  'Content-Type': 'application/json',
+
+                  },
+                success: function(data){
+
+                },
+                failure: function(errMsg) {
+                    console.log(errMsg);
+                }
+                });
+
+
+
+    });
 
 
 
@@ -235,4 +300,4 @@ function addAccountsinUI(details){
 }
 
 
-var cardNumbers=[],user_id,notificationlength;
+var cardNumbers=[],user_id,notificationlength=0;

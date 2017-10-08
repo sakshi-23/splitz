@@ -54,8 +54,8 @@
                         <div class="media">
                             <a class="thumbnail pull-left" href="#"> <img class="media-object" src="http://icons.iconarchive.com/icons/custom-icon-design/flatastic-2/72/product-icon.png" style="width: 72px; height: 72px;"> </a>
                             <div class="media-body">
-                                <h4 class="media-heading"><a href="#">SYNERGEL DIMENSIONS GEL CUSHIONS</a></h4>
-                                <h5 class="media-heading"> by <a href="#">Synergel</a></h5>
+                                <h4 class="media-heading"><a href="#">Janumet XR</a></h4>
+                                <h5 class="media-heading"> by <a href="#">50mg/1000mg Tablet</a></h5>
                                 <span>Status: </span><span class="text-warning"><strong>Leaves warehouse in 2 - 3 weeks</strong></span>
                             </div>
                         </div></td>
@@ -99,7 +99,7 @@
                             <span class="glyphicon glyphicon-shopping-cart"></span> Continue Shopping
                         </button></td>
                         <td>
-                        <button type="button" class="btn btn-success">
+                        <button type="button" class="btn btn-success done-shopping">
                             Checkout <span class="glyphicon glyphicon-play"></span>
                         </button></td>
                     </tr>
@@ -109,7 +109,7 @@
     </div>
 </div>
 
-<div class="container payment hidden">
+<div class="container payment-window hidden">
     <div class="row">
         <div class="col-xs-12 col-md-4 col-md-offset-4">
             <div class="panel panel-default">
@@ -119,8 +119,8 @@
                     </h3>
                     <div class="checkbox pull-right">
                         <label>
-                            <input type="checkbox" />
-                            Remember
+                            <input type="checkbox" class="populate"/>
+                            Populate
                         </label>
                     </div>
                 </div>
@@ -130,7 +130,7 @@
                         <label for="cardNumber">
                             CARD NUMBER</label>
                         <div class="input-group">
-                            <input type="text" class="form-control" id="cardNumber" placeholder="Valid Card Number"
+                            <input type="text" class="form-control cardnm" id="cardNumber" placeholder="Valid Card Number"
                                 required autofocus />
                             <span class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></span>
                         </div>
@@ -141,17 +141,17 @@
                                 <label for="expityMonth">
                                     EXPIRY DATE</label>
                                 <div class="col-xs-6 col-lg-6 pl-ziro">
-                                    <input type="text" class="form-control" id="expityMonth" placeholder="MM" required />
+                                    <input type="text" class="form-control expdatenm" id="expityMonth" placeholder="MM" required />
                                 </div>
                                 <div class="col-xs-6 col-lg-6 pl-ziro">
-                                    <input type="text" class="form-control" id="expityYear" placeholder="YY" required /></div>
+                                    <input type="text" class="form-control expyearnm" id="expityYear" placeholder="YY" required /></div>
                             </div>
                         </div>
                         <div class="col-xs-5 col-md-5 pull-right">
                             <div class="form-group">
                                 <label for="cvCode">
                                     CV CODE</label>
-                                <input type="password" class="form-control" id="cvCode" placeholder="CV" required />
+                                <input type="password" class="form-control ccvnm" id="cvCode" placeholder="CV" required />
                             </div>
                         </div>
                     </div>
@@ -163,16 +163,14 @@
                 </li>
             </ul>
             <br/>
-            <a href="#" class="btn btn-success btn-lg btn-block" role="button">Pay</a>
+            <a href="#" class="pay btn btn-success btn-lg btn-block" role="button">Pay</a>
         </div>
     </div>
 </div>
  <script src="static/js/library/jquery.js"></script>
+ <script src="static/js/app.js"></script>
 <script>
-$(".btn-success").on("click",function(){
-    $(".payment").removeClass("hidden");
-    $(".shopping").addClass("hidden");
-});
+
 </script>
 
 </body>

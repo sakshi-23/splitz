@@ -64,9 +64,8 @@ def create_user():
         new_user['my_vcards'] = []
         new_user['vcards'] = []
         user = users.insert_one(new_user)
-        user['user_id'] = str(list(user)[0]['inserted_id'])
-    else:
-        user['user_id'] = str(user['_id'])
+    user=users.find_one({'facebook_id': new_user.get('facebook_id', "null")})
+    user['user_id'] = str(user['_id'])
     del(user['_id'])
     return json.dumps(user)
 
