@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify
 import os
 from os import environ
 import json
+import pymongo
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 import sys
@@ -17,7 +18,7 @@ vcards_collection = 'vcards'
 groups_collection = 'groups'
 transaction_collection = 'transactions'
 user_transaction_collection = 'user_transactions'
-
+notification_collection = 'notifications'
 app = Flask(__name__)
 
 
@@ -36,6 +37,7 @@ vcards = db[vcards_collection]
 groups = db[groups_collection]
 transactions = db[transaction_collection]
 user_transactions = db[user_transaction_collection]
+notifications = db[notification_collection]
 #------------------------------
 
 port = int(os.getenv('PORT', 8000))
@@ -55,12 +57,12 @@ def shopping():
 @app.route('/register', methods=['POST'])
 def create_user():
     new_user = request.get_json(silent=True)
-    user = users.find_one({'facebook_id': new_user['facebook_id']})
+    user = users.find_one({'facebook_id': new_user.get('facebook_id',"null")})
     if user is None:
         new_user['my_vcards'] = []
         new_user['vcards'] = []
         user = users.insert_one(new_user)
-        user['user_id'] = str(user['inserted_id'])
+        user['user_id'] = str(list(user)[0]['inserted_id'])
     else:
         user['user_id'] = str(user['_id'])
     del(user['_id'])
@@ -127,12 +129,23 @@ def create_card():
     request_id = str(request_id)
     virtual_card = generate_virtual_card(request_id)
     owner_id = virtual_card_info['owner_user_id']
-    users.update_one({'_id': ObjectId(owner_id)}, {'$push': {'my_vcards': virtual_card['vcard_id'], 'vcard_req_ref': request_id }})
+    owner_user = users.find_one_and_update({'_id': ObjectId(owner_id)}, {'$push': {'my_vcards': virtual_card['vcard_id'], 'vcard_req_ref': request_id }})
     accounts = virtual_card_info['accounts']
     for account in accounts:
         if account['user_exists'] :
-            user_id = account['user_id']
-            if user_id != owner_id:
+            user_id = ''
+            if 'facebook_id' in account:
+                user_id = str(users.find_one({'facebook_id': account['facebook_id']})['_id'])
+            elif 'user_id' in account:
+                user_id = account['user_id']
+            if len(user_id) !=0 and user_id != owner_id:
+                n_obj = {}
+                n_obj['user_id'] = user_id
+                n_obj['message'] = owner_user['name'] + ' has created a spending card with max limit $'+virtual_card_info['amount']+'. ' \
+                                   'You would be charged '+account['amount']+' % of the transactions'
+                n_obj['status'] = 'pending'
+                n_obj['status_code'] = 1
+                notifications.insert_one(n_obj)
                 users.update_one({'_id': ObjectId(user_id)}, {'$push': {'vcards': virtual_card['vcard_id'], 'vcard_req_ref': request_id}})
                 send_app_notification(user_id, request_id)
         else:
@@ -168,8 +181,14 @@ def transact():
         if account['user_exists']:
             transaction_info['transaction_id'] = transaction_id
             account['transaction_info'] = transaction_info
-            ut_id = str(user_transactions.insert_one(account).inserted_id)
-            users.update_one({'_id': ObjectId(account['user_id'])}, {'$push': {'transactions': ut_id}})
+            user_transactions.insert_one(account).inserted_id
+            n_obj = {}
+            n_obj['user_id'] = account['user_id']
+            n_obj['message'] = 'Purchase of '+transaction_info['amount']+' at '+transaction_info['merchant_name']+'' \
+                            ' was made with split card '+ vcard_req['description']
+            n_obj['status'] = 'pending'
+            n_obj['status_code'] = 1
+            notifications.insert_one(n_obj)
     transaction_res = {}
     transaction_res['transaction_id'] = transaction_id
     transaction_res['status'] = 'success'
@@ -178,11 +197,9 @@ def transact():
 
 @app.route('/user/<user_id>/transactions', methods=['GET'])
 def get_transactions_user(user_id):
-    user = users.find_one({'_id':ObjectId(user_id)})
-    user_trans = user['transactions']
+    uts = user_transactions.find({'user_id':user_id})
     res_transactions = []
-    for user_tran in user_trans:
-        ut = user_transactions.find_one({'_id': ObjectId(user_tran)})
+    for ut in uts:
         ut_dict = {}
         if 'payment_method' not in ut:
             ut_dict['status'] = 'pending'
@@ -194,6 +211,16 @@ def get_transactions_user(user_id):
         res_transactions.append(ut_dict)
     return json.dumps(res_transactions)
 
+@app.route('/user/<user_id>/notifications', methods=['GET'])
+def get_user_notifications(user_id):
+    user_notifications = notifications.find({'user_id': user_id}).sort('status_code', pymongo.ASCENDING)
+    n = []
+    for un in user_notifications:
+        un['notification_id'] = str(un['_id'])
+        del(un['_id'])
+        n.append(un)
+    return json.dumps(n)
+
 
 @app.route('/group/<group_id>/transactions', methods=['GET'])
 def get_transactions_group(group_id):
@@ -201,7 +228,21 @@ def get_transactions_group(group_id):
 
 @app.route('/vcard/<card_id>/transactions')
 def get_transactions_card(card_id):
-    return []
+    cts = transactions.find({'vcard_id': card_id})
+    cts_res = []
+    for t in cts:
+        t['transaction_id'] = str(t['_id'])
+        del(t['_id'])
+        cts_res.append(t)
+    return json.dumps(cts_res)
+
+
+@app.route('/manage_notification', methods=['POST'])
+def manage_notification():
+    nt = request.get_json(silent=True)
+    nt_id = nt['notification_id']
+    notifications.update_one({'_id':ObjectId(nt_id)}, {'$set' : {'status' : nt['status'], 'status_code' : 2}})
+    return 'Notification status updated'
 
 
 def generate_virtual_card(request_id):
